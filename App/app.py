@@ -107,7 +107,7 @@ with st.sidebar:
     st.info(
         "This application uses a machine learning model to screen for Autism Spectrum Disorder (ASD) "
         "based on the AQ-10 questionnaire and demographic data. "
-        "The model is a Logistic Regression classifier trained on a public dataset."
+        "The model is a Support Vector Classifier (SVC) selected through hyperparameter tuning."
     )
     st.title("Disclaimer")
     st.warning(
