@@ -93,4 +93,9 @@ The application is implemented in [`App/app.py`](App/app.py).
 
 3.  **Run the Streamlit application:**
     ```sh
-    streamlit
+    streamlit run App/app.py
+    ```
+
+## Dependencies
+
+Install the Python dependencies listed in [`requirements.txt`](requirements.txt).
