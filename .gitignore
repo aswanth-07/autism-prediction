@@ -1,0 +1,18 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+.env
+.DS_Store
+.idea/
+.vscode/
+.ipynb_checkpoints/
+
+# Generated local reports that are not part of the reviewed release.
+reports/holdout_predictions.csv

@@ -1,0 +1,312 @@
+{
+  "protocol": {
+    "selection": "Nested stratified cross-validation on the training partition",
+    "primary_metric": "F1 for the positive class",
+    "holdout": "20% stratified split, evaluated once after model and threshold selection",
+    "threshold_selection": "Maximum F1 on five-fold out-of-fold training probabilities",
+    "random_state": 42,
+    "quick_mode": false
+  },
+  "data_audit": {
+    "source_rows": 800,
+    "usable_rows": 577,
+    "excluded_under_18": 223,
+    "excluded_over_100": 0,
+    "positive_rows": 124,
+    "negative_rows": 453,
+    "duplicate_rows": 0
+  },
+  "split": {
+    "training_rows": 461,
+    "holdout_rows": 116,
+    "training_positive_rate": 0.21475054229934923,
+    "holdout_positive_rate": 0.21551724137931033
+  },
+  "model_comparison": [
+    {
+      "key": "extra_trees",
+      "model": "Extremely Randomized Trees",
+      "best_parameters": {
+        "classifier__class_weight": "balanced",
+        "classifier__max_depth": null,
+        "classifier__max_features": "sqrt",
+        "classifier__min_samples_leaf": 2
+      },
+      "inner_cv_best_f1": 0.6920115134804627,
+      "outer_folds": 5,
+      "inner_folds": 4,
+      "nested_f1_mean": 0.6946403465108766,
+      "nested_f1_std": 0.06618381602764006,
+      "nested_roc_auc_mean": 0.8948627633581671,
+      "nested_roc_auc_std": 0.02534925932788223,
+      "nested_average_precision_mean": 0.676537049373311,
+      "nested_average_precision_std": 0.09279492455463773,
+      "nested_balanced_accuracy_mean": 0.8330309220539934,
+      "nested_balanced_accuracy_std": 0.042608087498178,
+      "nested_precision_mean": 0.6181587847327558,
+      "nested_precision_std": 0.11057466425666922,
+      "nested_recall_mean": 0.8184210526315789,
+      "nested_recall_std": 0.09692287821422575
+    },
+    {
+      "key": "rbf_svc",
+      "model": "RBF Support Vector Classifier",
+      "best_parameters": {
+        "classifier__C": 2.0,
+        "classifier__class_weight": "balanced",
+        "classifier__gamma": "scale"
+      },
+      "inner_cv_best_f1": 0.6899561112141062,
+      "outer_folds": 5,
+      "inner_folds": 4,
+      "nested_f1_mean": 0.6841095660177274,
+      "nested_f1_std": 0.04435555147432098,
+      "nested_roc_auc_mean": 0.8854932708483538,
+      "nested_roc_auc_std": 0.030477122233890475,
+      "nested_average_precision_mean": 0.6693292808898903,
+      "nested_average_precision_std": 0.07518146199388509,
+      "nested_balanced_accuracy_mean": 0.8350749018665387,
+      "nested_balanced_accuracy_std": 0.03976269216037483,
+      "nested_precision_mean": 0.5841077441077441,
+      "nested_precision_std": 0.06381799387395855,
+      "nested_recall_mean": 0.8389473684210527,
+      "nested_recall_std": 0.09538157803980223
+    },
+    {
+      "key": "random_forest",
+      "model": "Random Forest",
+      "best_parameters": {
+        "classifier__class_weight": "balanced_subsample",
+        "classifier__max_depth": null,
+        "classifier__max_features": 0.7,
+        "classifier__min_samples_leaf": 2
+      },
+      "inner_cv_best_f1": 0.6913208980902678,
+      "outer_folds": 5,
+      "inner_folds": 4,
+      "nested_f1_mean": 0.6840152328874133,
+      "nested_f1_std": 0.057568183279177856,
+      "nested_roc_auc_mean": 0.8986149162861491,
+      "nested_roc_auc_std": 0.021214278061850115,
+      "nested_average_precision_mean": 0.6862088612847496,
+      "nested_average_precision_std": 0.08332164592674651,
+      "nested_balanced_accuracy_mean": 0.8311816069855003,
+      "nested_balanced_accuracy_std": 0.03754440637165216,
+      "nested_precision_mean": 0.5892471405574854,
+      "nested_precision_std": 0.08348422579276711,
+      "nested_recall_mean": 0.828421052631579,
+      "nested_recall_std": 0.07538911065624908
+    },
+    {
+      "key": "logistic_regression",
+      "model": "Logistic Regression",
+      "best_parameters": {
+        "classifier__C": 1.0,
+        "classifier__class_weight": "balanced"
+      },
+      "inner_cv_best_f1": 0.688742644674848,
+      "outer_folds": 5,
+      "inner_folds": 4,
+      "nested_f1_mean": 0.6678586463679086,
+      "nested_f1_std": 0.08173851204680353,
+      "nested_roc_auc_mean": 0.8924181887366819,
+      "nested_roc_auc_std": 0.027447612754063214,
+      "nested_average_precision_mean": 0.6707742367339453,
+      "nested_average_precision_std": 0.0816879345747428,
+      "nested_balanced_accuracy_mean": 0.8170383721861733,
+      "nested_balanced_accuracy_std": 0.06960500687914142,
+      "nested_precision_mean": 0.5828968390707521,
+      "nested_precision_std": 0.06644110380112338,
+      "nested_recall_mean": 0.7889473684210527,
+      "nested_recall_std": 0.13771734270597316
+    },
+    {
+      "key": "hybrid_mlp_stack",
+      "model": "Hybrid OOF Stack + MLP",
+      "best_parameters": {
+        "classifier__final_estimator__mlp__alpha": 0.1,
+        "classifier__final_estimator__select__k": 8
+      },
+      "inner_cv_best_f1": 0.6351633986928105,
+      "outer_folds": 5,
+      "inner_folds": 4,
+      "nested_f1_mean": 0.6288139756224863,
+      "nested_f1_std": 0.07157120625905118,
+      "nested_roc_auc_mean": 0.8585335055675719,
+      "nested_roc_auc_std": 0.03962867233645481,
+      "nested_average_precision_mean": 0.6222183879181072,
+      "nested_average_precision_std": 0.0963494520528385,
+      "nested_balanced_accuracy_mean": 0.7710732596331009,
+      "nested_balanced_accuracy_std": 0.04886736932486834,
+      "nested_precision_mean": 0.6190655501811688,
+      "nested_precision_std": 0.11130151771971328,
+      "nested_recall_mean": 0.6668421052631579,
+      "nested_recall_std": 0.1247518312113362
+    }
+  ],
+  "selected_model": {
+    "key": "extra_trees",
+    "label": "Extremely Randomized Trees",
+    "threshold": 0.48,
+    "training_oof_f1_at_threshold": 0.6812227074235808
+  },
+  "holdout_metrics": {
+    "threshold": 0.48,
+    "accuracy": 0.853448275862069,
+    "balanced_accuracy": 0.805054945054945,
+    "precision": 0.6428571428571429,
+    "recall": 0.72,
+    "f1": 0.6792452830188679,
+    "roc_auc": 0.9243956043956044,
+    "average_precision": 0.7912870665227646,
+    "brier_score": 0.09693092784694868,
+    "confusion_matrix": [
+      [
+        81,
+        10
+      ],
+      [
+        7,
+        18
+      ]
+    ],
+    "f1_95_ci": [
+      0.5106174384647476,
+      0.8158029001074113
+    ],
+    "roc_auc_95_ci": [
+      0.8656994574053398,
+      0.969429422916265
+    ]
+  },
+  "limitations": [
+    "Small course dataset with incomplete provenance and demographic imbalance.",
+    "The source marks all rows as adults but contains 223 ages below 18; those rows are excluded.",
+    "The source result field is excluded because its semantics cannot be reproduced by the app.",
+    "Unknown values are common in ethnicity and relation, and subgroup performance is not established.",
+    "Performance estimates have wide uncertainty and do not establish clinical validity."
+  ],
+  "artifact_metadata": {
+    "project_version": "1.0.0",
+    "generated_at_utc": "2026-07-10T17:27:33.132011+00:00",
+    "python_version": "3.13.3",
+    "scikit_learn_version": "1.6.1",
+    "dataset_sha256": "47f4abe8180f11244b9e43f961f97f3a25212b205b9ee2af247f794f744233ee",
+    "model_key": "extra_trees",
+    "model_label": "Extremely Randomized Trees",
+    "features": [
+      "A1_Score",
+      "A2_Score",
+      "A3_Score",
+      "A4_Score",
+      "A5_Score",
+      "A6_Score",
+      "A7_Score",
+      "A8_Score",
+      "A9_Score",
+      "A10_Score",
+      "age",
+      "gender",
+      "ethnicity",
+      "jaundice",
+      "family_asd_history",
+      "country_of_residence",
+      "used_app_before",
+      "relation"
+    ],
+    "scope": "Adults aged 18\u2013100 in the supplied course dataset",
+    "intended_use": "Educational research demonstration only; not diagnosis or clinical triage",
+    "category_options": {
+      "gender": [
+        "f",
+        "m"
+      ],
+      "ethnicity": [
+        "Asian",
+        "Black",
+        "Hispanic",
+        "Latino",
+        "Middle Eastern",
+        "Others",
+        "Pasifika",
+        "South Asian",
+        "Turkish",
+        "White-European"
+      ],
+      "jaundice": [
+        "no",
+        "yes"
+      ],
+      "family_asd_history": [
+        "no",
+        "yes"
+      ],
+      "country_of_residence": [
+        "Afghanistan",
+        "AmericanSamoa",
+        "Angola",
+        "Argentina",
+        "Armenia",
+        "Aruba",
+        "Australia",
+        "Austria",
+        "Azerbaijan",
+        "Bahamas",
+        "Bangladesh",
+        "Belgium",
+        "Bolivia",
+        "Brazil",
+        "Burundi",
+        "Canada",
+        "China",
+        "Cyprus",
+        "Czech Republic",
+        "Egypt",
+        "Ethiopia",
+        "France",
+        "Germany",
+        "Hong Kong",
+        "Iceland",
+        "India",
+        "Iran",
+        "Iraq",
+        "Ireland",
+        "Italy",
+        "Jordan",
+        "Kazakhstan",
+        "Malaysia",
+        "Mexico",
+        "Netherlands",
+        "New Zealand",
+        "Nicaragua",
+        "Niger",
+        "Oman",
+        "Pakistan",
+        "Romania",
+        "Russia",
+        "Saudi Arabia",
+        "Serbia",
+        "South Africa",
+        "Spain",
+        "Sri Lanka",
+        "Sweden",
+        "Ukraine",
+        "United Arab Emirates",
+        "United Kingdom",
+        "United States",
+        "Viet Nam"
+      ],
+      "used_app_before": [
+        "no",
+        "yes"
+      ],
+      "relation": [
+        "Health care professional",
+        "Others",
+        "Parent",
+        "Relative",
+        "Self"
+      ]
+    }
+  }
+}

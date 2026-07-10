@@ -1,101 +1,182 @@
-# Autism Spectrum Disorder (ASD) Screening Prediction
+# Adult ASD Screening — Classical Machine Learning
 
-This repository contains the coursework project for **BCSE109L - Machine Learning**. The project focuses on developing a machine learning model to predict the likelihood of an individual having Autism Spectrum Disorder based on responses to a screening questionnaire and demographic data.
+[![quality](https://github.com/aswanth-07/autism-prediction/actions/workflows/ci.yml/badge.svg)](https://github.com/aswanth-07/autism-prediction/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/Python-3.10%20to%203.13-3776AB)](https://www.python.org/)
+[![scikit-learn](https://img.shields.io/badge/scikit--learn-1.4%2B-F7931E)](https://scikit-learn.org/)
 
-## Table of Contents
+A reproducible tabular classification study built to demonstrate the full traditional machine-learning
+workflow: data-quality auditing, leakage prevention, baselines, nested model selection, imbalance-aware
+evaluation, threshold tuning, model interpretation, artifact versioning, tests, and deployment-safe
+inference.
 
-- [Project Overview](#project-overview)
-- [Project Structure](#project-structure)
-- [Methodology](#methodology)
-- [Results](#results)
-- [Web Application](#web-application)
-- [How to Run](#how-to-run)
-- [Dependencies](#dependencies)
+> **Educational research only.** This repository does not provide a diagnosis, clinical risk score,
+> or medical device. Its supplied dataset is small and has incomplete provenance.
 
-## Project Overview
+## Release result
 
-The primary goal of this project is to explore various machine learning techniques to build an effective ASD screening tool. The process involves comprehensive data preprocessing, feature engineering, model training, hyperparameter tuning, and evaluation. Several advanced methods like ensemble learning, meta-learning, and hybrid models are investigated to achieve the best possible performance on an imbalanced dataset.
+The release protocol reserves a stratified 20% holdout before any model selection. Five classical
+model families are tuned and compared using nested stratified cross-validation on the remaining data.
+The decision threshold is learned from out-of-fold training probabilities, then the holdout is evaluated
+once.
 
-## Project Structure
+| Result | Value |
+|---|---:|
+| Selected model | Extremely Randomized Trees |
+| Nested CV F1 | **0.695 ± 0.066** |
+| Holdout F1 | **0.679** (95% bootstrap CI 0.511–0.816) |
+| Holdout recall | **0.720** |
+| Holdout precision | **0.643** |
+| Holdout ROC-AUC | **0.924** (95% bootstrap CI 0.866–0.969) |
+| Holdout average precision | **0.791** |
+| Holdout balanced accuracy | **0.805** |
 
-```
+The interval is as important as the point estimate: the untouched holdout contains 116 adults and only
+25 positive labels. Exact values, confusion matrix, parameters, versions, and the raw-data SHA-256 are
+stored in [`reports/metrics.json`](reports/metrics.json).
+
+## What makes the evaluation trustworthy
+
+- **Adult-only contract:** the source labels every row “18 and more” but contains 223 ages below 18;
+  those inconsistent rows are excluded and counted.
+- **Untouched holdout:** model family, hyperparameters, and threshold are selected without using holdout
+  outcomes.
+- **Nested cross-validation:** five outer folds estimate model-family performance; four inner folds tune
+  hyperparameters.
+- **Fold-local preprocessing:** missing-value imputation, scaling, and one-hot encoding are fitted inside
+  each training fold.
+- **Deployable features only:** the undocumented continuous `result` field is excluded because the old
+  app incorrectly replaced it with an AQ sum from a different distribution.
+- **No target encoding:** unknown and rare categories are handled by an inference-safe one-hot encoder,
+  eliminating the full-dataset target leakage in the legacy workflow.
+- **Multiple metrics:** F1 is primary, with recall, precision, balanced accuracy, ROC-AUC, average
+  precision, Brier score, confusion matrix, and bootstrap intervals reported together.
+
+Read the complete forensic review in [`docs/REPOSITORY_AUDIT.md`](docs/REPOSITORY_AUDIT.md).
+
+## Model comparison
+
+| Model family | Nested F1 | Nested ROC-AUC |
+|---|---:|---:|
+| Extremely Randomized Trees | **0.695 ± 0.066** | 0.895 |
+| RBF Support Vector Classifier | 0.684 ± 0.044 | 0.885 |
+| Random Forest | 0.684 ± 0.058 | **0.899** |
+| Logistic Regression | 0.668 ± 0.082 | 0.892 |
+| Hybrid OOF Stack + MLP | 0.629 ± 0.072 | 0.859 |
+
+Model complexity is not treated as a result. Logistic Regression remains an explicit baseline, while
+SVC and two bagging ensembles test nonlinear decision boundaries. The custom hybrid combines genuine
+out-of-fold Random Forest, linear SVC, and AdaBoost probabilities with selected source features before
+an MLP meta-learner. The winner is selected by outer-fold F1, not by novelty or holdout score.
+
+![Nested cross-validation model comparison](reports/figures/model_comparison.png)
+
+## Repository map
+
+```text
 .
-├── App/
-│   └── app.py                # Streamlit web application
-├── Data/
-│   ├── Processed Data/       # Processed and encoded datasets
-│   └── Raw Data/             # The original raw dataset
+├── App/app.py                    # Ethical Streamlit inference demo
+├── Data/Raw Data/Raw Data.csv    # Preserved supplied dataset
 ├── Models/
-│   └── best_model.joblib     # The final, best-performing trained model
-├── results graphs/
-│   └── *.png                 # Various plots and graphs from the analysis
-├── BaseModels.ipynb          # EDA and training of baseline models (SVM, KNN, etc.)
-├── Best_Model.ipynb          # In-depth evaluation of the final selected model
-├── Dataprocessing.ipynb      # Data cleaning, preprocessing, and feature engineering
-├── Ensemble.ipynb            # Training and evaluation of ensemble models (RF, AdaBoost, XGBoost)
-├── Hybrid_Ensemble.ipynb     # Implementation of a custom hybrid ensemble model
-├── Hyper_Parameter.ipynb     # Hyperparameter tuning to find the best model and parameters
-├── Meta_Learning.ipynb       # Implementation of a meta-learning (stacking) model
-├── requirements.txt          # Python dependencies
-└── README.md                 # Project documentation
+│   └── production_pipeline.joblib# Pipeline + threshold + metadata
+├── reports/
+│   ├── figures/                  # Generated evaluation plots
+│   ├── metrics.json              # Machine-readable release evidence
+│   ├── model_comparison.csv
+│   └── permutation_importance.csv
+├── src/asd_screening/
+│   ├── data.py                   # Schema, audit, normalization
+│   ├── modeling.py               # Preprocessing and model families
+│   ├── evaluation.py             # Metrics, threshold, intervals
+│   ├── training.py               # End-to-end release protocol
+│   ├── inference.py              # Artifact validation and prediction
+│   └── web_export.py             # Exact Extra Trees browser export
+├── exports/                      # Versioned static web model
+├── tests/                        # Data, pipeline, artifact, web parity tests
+├── DATA_CARD.md                  # Provenance and representation limits
+├── MODEL_CARD.md                 # Intended use and evaluation contract
+└── *.ipynb                       # Preserved historical experiments
 ```
 
-## Methodology
+## Reproduce the release
 
-1.  **Data Preprocessing**: The initial dataset was cleaned by handling missing values, correcting data types, and removing irrelevant columns. Outliers in the `age` feature were managed by replacing them with the median value. The `contry_of_res` feature was mapped to a more general `region` feature. This is detailed in [`Dataprocessing.ipynb`](Dataprocessing.ipynb).
+Python 3.10–3.13 is supported.
 
-2.  **Feature Encoding**: Categorical features were encoded using three different strategies to evaluate their impact on model performance:
-    *   **Target Encoding**
-    *   **Frequency Encoding**
-    *   **One-Hot Encoding**
+```bash
+git clone https://github.com/aswanth-07/autism-prediction.git
+cd autism-prediction
+python -m venv .venv
+```
 
-3.  **Handling Class Imbalance**: The dataset is imbalanced. Techniques like **SMOTE** and **ADASYN** were applied to the training data to create a more balanced class distribution, which is crucial for training unbiased models.
+Activate the environment, then install and train:
 
-4.  **Modeling**: A wide range of models were trained and evaluated:
-    *   **Base Models**: SVM, KNN, Decision Tree ([`BaseModels.ipynb`](BaseModels.ipynb)).
-    *   **Ensemble Models**: Random Forest, AdaBoost, XGBoost ([`Ensemble.ipynb`](Ensemble.ipynb)).
-    *   **Meta-Learning**: A stacking classifier using base models to train a final logistic regression meta-learner ([`Meta_Learning.ipynb`](Meta_Learning.ipynb)).
-    *   **Hybrid Ensemble**: A custom model that combines meta-features from base models with the most important original features, trained with an MLP classifier ([`Hybrid_Ensemble.ipynb`](Hybrid_Ensemble.ipynb)).
+```bash
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev]"
+python -m asd_screening.training
+```
 
-5.  **Hyperparameter Tuning**: `GridSearchCV` was used to systematically search for the optimal hyperparameters for the most promising models (SVM, AdaBoost, XGBoost) across different data encodings and SMOTE applications ([`Hyper_Parameter.ipynb`](Hyper_Parameter.ipynb)).
+The command regenerates the production artifact and every file in `reports/`. A fast structural smoke
+run is available as `python -m asd_screening.training --quick`; its metrics must not be published.
 
-6.  **Evaluation**: The primary metric for model evaluation was the **F1-Score**, which is well-suited for imbalanced classification tasks. Other metrics like Precision, Recall, Accuracy, and AUC were also used for a comprehensive analysis.
+## Run the inference demo
 
-## Results
+```bash
+streamlit run App/app.py
+```
 
-After extensive experimentation, the best-performing model was identified through the hyperparameter tuning process in [`Hyper_Parameter.ipynb`](Hyper_Parameter.ipynb).
+The app reads its model name, version, feature contract, category options, and threshold from the
+artifact. It does not hard-code training statistics, store responses, or present the score as a clinical
+probability. Because authoritative questionnaire wording is absent from the supplied data, it accepts
+the ten already-scored binary source fields instead of inventing a questionnaire.
 
--   **Best Model**: Support Vector Classifier (SVC)
--   **Best Encoding**: Target Encoding
--   **SMOTE**: Not applied (performed better on the original imbalanced data)
--   **Test F1-Score**: **0.743**
+## Export exact browser inference
 
-The final model and its configuration were saved to `Models/best_model.joblib`. A detailed performance analysis, including confusion matrix, ROC curve, and precision-recall curve, is available in [`Best_Model.ipynb`](Best_Model.ipynb).
+```bash
+python -m asd_screening.web_export
+```
 
-## Web Application
+This writes `exports/asd_extra_trees_web.json`: numeric scaling state, categorical vectors, threshold,
+metadata, and all 300 fitted trees. The reference evaluator is tested against scikit-learn on reviewed
+records with maximum absolute probability error below `1e-12`. A static frontend such as Vercel can
+therefore run the selected release model without Python, an API, or transmitting a user's inputs.
 
-A user-friendly web application was developed using Streamlit to provide an interactive interface for the screening tool. Users can answer the AQ-10 screening questions and provide demographic information to get a real-time prediction.
+## Quality checks
 
-The application is implemented in [`App/app.py`](App/app.py).
+```bash
+ruff check .
+mypy src
+pytest
+```
 
-## How to Run
+GitHub Actions runs the same checks on pushes and pull requests. Tests cover the reviewed row counts,
+age scope, schema failures, missing and unseen categories, threshold metrics, artifact compatibility,
+end-to-end inference, and parity between scikit-learn and the exported browser model.
 
-1.  **Clone the repository:**
-    ```sh
-    git clone <repository-url>
-    cd <repository-folder>
-    ```
+## Historical notebooks
 
-2.  **Install dependencies:**
-    ```sh
-    pip install -r requirements.txt
-    ```
+The seven root notebooks are retained as coursework history and cover preprocessing, base models,
+ensembles, stacking, a hybrid ensemble, tuning, and visualization. They are **not** the release benchmark:
+several use derived CSVs encoded before splitting or select a winner by test F1. Install their optional
+environment with:
 
-3.  **Run the Streamlit application:**
-    ```sh
-    streamlit run App/app.py
-    ```
+```bash
+python -m pip install -e ".[legacy]"
+```
 
-## Dependencies
+Their exact disposition is recorded in the repository audit. The production source and reports are the
+single source of truth for current claims.
 
-Install the Python dependencies listed in [`requirements.txt`](requirements.txt).
+## Responsible limitations
+
+- Dataset origin, collection protocol, consent basis, and dataset-specific license are not bundled.
+- The dataset is small, imbalanced, demographically uneven, and contains many unknown categories.
+- The available gender values are only `f` and `m`; subgroup fairness is not established.
+- Performance has not been externally validated on a separate population.
+- A model score cannot confirm or rule out ASD and must not guide care.
+
+See [`DATA_CARD.md`](DATA_CARD.md) and [`MODEL_CARD.md`](MODEL_CARD.md) before interpreting any output.
+
+## License
+
+Code is provided under the repository's [MIT License](LICENSE). The dataset's own licensing and
+provenance remain unresolved; the code license does not grant rights to redistribute the data.
